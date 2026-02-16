@@ -7,6 +7,7 @@ Purpose: Defines the Maze problem where an agent must navigate from a start
 '''
 
 from math import sqrt
+import sys
 import problem
 
 class MiceAndMeowState:
@@ -46,7 +47,7 @@ class MiceAndMeows(problem.Problem):
     except for moving into water, which costs 6.
     '''
     heuristics = set(('manhattan', 'euclidean', 'mice-remaining','totalDistance','closestMice'))
-
+    visited = []
     def __init__(self, boardFilename=None, heuristic=None):
         '''
         Parameters:
@@ -67,7 +68,6 @@ class MiceAndMeows(problem.Problem):
             'totalDistance' : self.heuristicTotalDistance,
             'closestMice' : self.heuristicClosestMice
         }
-        
         if heuristic is None:
             self.heuristic = self.defaultHeuristic
         elif heuristic in heuristics:
@@ -139,6 +139,8 @@ class MiceAndMeows(problem.Problem):
             ('down', i+1,j) 
         )
 
+        ## some kind of a list to keep track of visited nodes and t
+    
         for move,i,j in potentialSuccessorSpots:
             if( i >= 0 and i < len(self.board) and 
                 j >= 0 and j <len(self.board[i])):
@@ -151,7 +153,10 @@ class MiceAndMeows(problem.Problem):
                     mice = tuple([m for m in mice if m != (i,j)])
 
                 successorState = MiceAndMeowState((i,j), mice)
-                successors.append((move, successorState, cost, self.getDistance(successorState)))
+
+                if successorState not in self.visited:
+                    successors.append((move, successorState, cost, self.getDistance(successorState)))
+                    self.visited.append(successors)
 
         return successors
 
@@ -223,7 +228,10 @@ class MiceAndMeows(problem.Problem):
         # Still admissible: agent must visit at least the closest mouse, then reach the exit
         distToExit = abs(self.exit[0] - closestMouse[0]) + abs(self.exit[1] - closestMouse[1])
         return lowestDistance + distToExit
-                
+
+    ##### second heuristic
+    def heuristicTwo(self,state):
+        return        
     
     ## This would work: Distance of all the mices together if there are mices, if not we caluclate the manhatten distance to the goal
     def heuristicTotalDistance(self,state):

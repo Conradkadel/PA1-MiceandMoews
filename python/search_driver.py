@@ -29,9 +29,8 @@ X = 1
 Y = 0
 
 class SearchDriver:
-
     def __init__(self, problem, searchStrategy, fps=FPS, spotSize=SPOT_SIZE, 
-            marginSize=MARGIN_SIZE, graphicsOn=True):
+            marginSize=MARGIN_SIZE, graphicsOn=True, graphSearch=False):
         '''
         Parameters:
         	problem (Problem): The search Problem object (e.g., of type Maze).
@@ -48,8 +47,7 @@ class SearchDriver:
         self.spotSize = spotSize 
         self.marginSize = marginSize
         self.size = (len(problem.board[0])*(spotSize+marginSize)+marginSize, 
-        len(problem.board)*(spotSize+marginSize)+marginSize)
-        
+        len(problem.board)*(spotSize+marginSize)+marginSize)    
         self.graphicsOn = graphicsOn and hasattr(problem, 'drawableBoard') and callable(problem.drawableBoard)
 
         if self.graphicsOn:
@@ -186,10 +184,6 @@ class SearchDriver:
             self.board[curSpot[0]][curSpot[1]].images.append(self.pathImages[actionPath])
             self.board[curSpot[0]][curSpot[1]].color = ORANGE
 
-
-
-
-
     def run(self):
         '''
         Runs the search strategy and displays the progress graphically if graphicsOn 
@@ -283,6 +277,7 @@ def main():
     spotSize = SPOT_SIZE 
     marginSize = MARGIN_SIZE
     heuristic = None
+    graphSearch = False
     graphicsOn = True
 
     searchStrategies = {
@@ -370,6 +365,10 @@ def main():
         elif arg.startswith('-graphics='):
             graphicsOn = arg[10:] == 'on'
 
+        ## Tree vs Graph
+        elif arg.startswith('-graph='):
+            graphSearch = arg[7:] == 'on'
+
         
     if boardFile == None or searchProblem == None or searchStrategy == None:
         sys.stderr.write('Too few args.\n\n'+ USAGE)
@@ -383,7 +382,7 @@ def main():
     problemInstance = searchProblems[searchProblem](boardFile, heuristic)
     
     searchInstance = searchStrategies[searchStrategy](problemInstance)
-    (SearchDriver(problemInstance, searchInstance, fps, spotSize, marginSize, graphicsOn)).run()
+    (SearchDriver(problemInstance, searchInstance, fps, spotSize, marginSize, graphicsOn, graphSearch)).run()
 
 if __name__ == '__main__':
     main()

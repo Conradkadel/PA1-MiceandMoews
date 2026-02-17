@@ -40,14 +40,13 @@ class MiceAndMeowState:
         return hash((self.agentLocation, self.miceLocations))
     
 
-class MiceAndMeows(problem.Problem):
+class MiceAndMeows(problem.Problem, ):
     '''
     The search problem: Of Mice and Meows. The agent is a cat and the goal is to
     catch all of the mice and make it to the exit. The cost of moving is 1,
     except for moving into water, which costs 6.
     '''
-    heuristics = set(('manhattan', 'euclidean', 'mice-remaining','totalDistance','closestMice'))
-    visited = []
+    heuristics = set(('manhattan', 'euclidean', 'mice-remaining','totalDistance','closestMice', 'h2'))
     def __init__(self, boardFilename=None, heuristic=None):
         '''
         Parameters:
@@ -66,7 +65,8 @@ class MiceAndMeows(problem.Problem):
             'euclidean': self.euclideanDistance,
             'mice-remaining': self.miceRemainingDistance,
             'totalDistance' : self.heuristicTotalDistance,
-            'closestMice' : self.heuristicClosestMice
+            'closestMice' : self.heuristicClosestMice,
+            'h2' : self.heuristicTwo
         }
         if heuristic is None:
             self.heuristic = self.defaultHeuristic
@@ -153,10 +153,7 @@ class MiceAndMeows(problem.Problem):
                     mice = tuple([m for m in mice if m != (i,j)])
 
                 successorState = MiceAndMeowState((i,j), mice)
-
-                if successorState not in self.visited:
-                    successors.append((move, successorState, cost, self.getDistance(successorState)))
-                    self.visited.append(successors)
+                successors.append((move, successorState, cost, self.getDistance(successorState)))
 
         return successors
 
@@ -213,10 +210,8 @@ class MiceAndMeows(problem.Problem):
         '''
         return float(sqrt(pow(self.exit[0]-state.agentLocation[0], 2) + pow(self.exit[1]-state.agentLocation[1], 2)))
     
-    ## 
-    def heuristicClosestMice(self,state):
-        if len(state.miceLocations) == 0:
-            return self.manhattanDistance(state)
+
+    def getClosestMouse(self,state):
         lowestDistance = float('inf')
         closestMouse = None
         for x,y in state.miceLocations:
@@ -224,21 +219,36 @@ class MiceAndMeows(problem.Problem):
             if currentDistance < lowestDistance:
                 lowestDistance = currentDistance
                 closestMouse = (x, y)
+        return closestMouse
+    
+
+    ## THis one is optimal heuristic 
+    def heuristicClosestMice(self,state):
+        if len(state.miceLocations) == 0:
+            return self.manhattanDistance(state)
+        lowestDistance = float('inf')
+        closestMouse = self.getClosestMouse(state)
         # h = distance to nearest mouse + Manhattan distance from that mouse to exit
         # Still admissible: agent must visit at least the closest mouse, then reach the exit
         distToExit = abs(self.exit[0] - closestMouse[0]) + abs(self.exit[1] - closestMouse[1])
         return lowestDistance + distToExit
 
-    ##### second heuristic
+    ##### second heuristic = Remaining number of mice + distance to closest mice
+    ## SEcond heuristic 
     def heuristicTwo(self,state):
-        return        
+        if len(state.miceLocations) == 0:
+            return self.manhattanDistance(state)
+        closestM = self.getClosestMouse(state)
+        return(len(state.miceLocations) + ( abs(state.agentLocation[0] - closestM[0]) + abs(state.agentLocation[1] - closestM[1])))  
     
     ## This would work: Distance of all the mices together if there are mices, if not we caluclate the manhatten distance to the goal
+    ## Not optimal 
     def heuristicTotalDistance(self,state):
         if len(state.miceLocations) == 0:
             return self.manhattanDistance(state)
         return(self.distanceBetweenMice(state))
     
+    #
     def distanceBetweenMice(self,state):
         totalDistance = 0
         index = 0
@@ -248,7 +258,6 @@ class MiceAndMeows(problem.Problem):
             else:
                 totalDistance += abs(x - state.miceLocations[index + 1][0]) + abs(y - state.miceLocations[index + 1][1])
                 index += 1
-    
     
     def miceRemainingDistance(self, state):
         '''

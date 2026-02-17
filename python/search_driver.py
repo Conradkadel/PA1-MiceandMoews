@@ -49,6 +49,7 @@ class SearchDriver:
         self.size = (len(problem.board[0])*(spotSize+marginSize)+marginSize, 
         len(problem.board)*(spotSize+marginSize)+marginSize)    
         self.graphicsOn = graphicsOn and hasattr(problem, 'drawableBoard') and callable(problem.drawableBoard)
+        self.graphSearch = graphSearch
 
         if self.graphicsOn:
             pygame.init()
@@ -381,7 +382,7 @@ def main():
 
     problemInstance = searchProblems[searchProblem](boardFile, heuristic)
     
-    searchInstance = searchStrategies[searchStrategy](problemInstance)
+    searchInstance = searchStrategies[searchStrategy](problemInstance, graphSearch)
     (SearchDriver(problemInstance, searchInstance, fps, spotSize, marginSize, graphicsOn, graphSearch)).run()
 
 if __name__ == '__main__':

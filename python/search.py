@@ -62,7 +62,7 @@ class BFS:
     Breadth first search -- explores states based on distance from the starting
     state (closest first).
     '''
-    def __init__(self, problem):
+    def __init__(self, problem, graphSearch=False):
         ''''
         Constructor; readies the data members for the search.
 
@@ -74,6 +74,8 @@ class BFS:
         self.problem = problem
         self.maxFringeSize = 0
         self.statesExpanded = 0
+        self.visited = set()
+        self.graphSearch = graphSearch
         self.fringe = [SearchNode(problem.start, [], [problem.start], 0)]
 
     def nextState(self):
@@ -106,10 +108,13 @@ class BFS:
             node (SearchNode): The node in the search tree to expand.
         '''
         self.statesExpanded += 1
-
+        self.visited.add(node.state)
+        
         for move,successor,cost,dist in self.problem.successors(node.state):
             ## Skip successors if they've already been seen on this path.
-            if successor in node.pathStatesSet:
+            if self.graphSearch and successor in self.visited:
+                continue
+            if not self.graphSearch and successor in node.pathStatesSet:
                 continue
 
             self.fringe.append(SearchNode(
@@ -139,11 +144,13 @@ class DFS:
     Depth first search -- explores states based on distance from the starting
     state (farthest first).
     '''
-    def __init__(self, problem):
+    def __init__(self, problem, graphSearch=False):
         self.name = "DFS"
         self.problem = problem
         self.maxFringeSize = 0
         self.statesExpanded = 0
+        self.visited = set()
+        self.graphSearch = graphSearch
         self.fringe = [SearchNode(problem.start, [], [problem.start], 0)]
 
     def nextState(self):
@@ -177,10 +184,13 @@ class DFS:
             node (SearchNode): The node in the search tree to expand.
         '''
         self.statesExpanded += 1
-
+        self.visited.add(node.state)
+        
         for move,successor,cost,dist in self.problem.successors(node.state):
             ## Skip successors if they've already been seen on this path.
-            if successor in node.pathStatesSet:
+            if self.graphSearch and successor in self.visited:
+                continue
+            if not self.graphSearch and successor in node.pathStatesSet:
                 continue
 
             self.fringe.append(SearchNode(
@@ -209,11 +219,13 @@ class IterativeDeepening:
     '''
     Iterative deepening (ID) -- explores states using DFS at increasing depths.
     '''
-    def __init__(self, problem):
+    def __init__(self, problem, graphSearch=False):
         self.name = "Iterative deepening"
         self.problem = problem
         self.maxFringeSize = 0
         self.statesExpanded = 0
+        self.visited = set()
+        self.graphSearch = graphSearch
         self.fringe = [SearchNode(problem.start, [], [problem.start], 0)]
         self.depth = 0
         self.depthReached = 0
@@ -271,10 +283,13 @@ class IterativeDeepening:
             node (SearchNode): The node in the search tree to expand.
         '''
         self.statesExpanded += 1
-
+        self.visited.add(node.state)
+        
         for move,successor,cost,dist in self.problem.successors(node.state):
             ## Skip successors if they've already been seen on this path.
-            if successor in node.pathStatesSet:
+            if self.graphSearch and successor in self.visited:
+                continue
+            if not self.graphSearch and successor in node.pathStatesSet:
                 continue
 
             self.fringe.append(SearchNode(
@@ -305,11 +320,13 @@ class UCS:
     Uniform cost search -- explores states based on cost from the starting
     state (lowest cost first).
     '''
-    def __init__(self, problem):
+    def __init__(self, problem, graphSearch=False):
         self.name = "UCS"
         self.problem = problem
         self.maxFringeSize = 0
         self.statesExpanded = 0
+        self.visited = set()
+        self.graphSearch = graphSearch
         self.fringe = [SearchNode(problem.start, [], [problem.start], 0)]
         
     def nextState(self):
@@ -342,10 +359,13 @@ class UCS:
             node (SearchNode): The node in the search tree to expand.
         '''
         self.statesExpanded += 1
-
+        self.visited.add(node.state)
+        
         for move,successor,cost,dist in self.problem.successors(node.state):
             ## Skip successors if they've already been seen on this path.
-            if successor in node.pathStatesSet:
+            if self.graphSearch and successor in self.visited:
+                continue
+            if not self.graphSearch and successor in node.pathStatesSet:
                 continue
 
             heapq.heappush(self.fringe, SearchNode(
@@ -378,11 +398,13 @@ class Greedy:
     Greedy search -- explores states based on their estimated distance to the
     goal state (closer to the goal = expanded sooner)
     '''
-    def __init__(self, problem):
+    def __init__(self, problem, graphSearch=False):
         self.name = "Greedy"
         self.problem = problem
         self.maxFringeSize = 0
         self.statesExpanded = 0
+        self.visited = set()
+        self.graphSearch = graphSearch
         ## Set the priority of the start state to h(x) -- we're calling it the
         ## "distance" to the goal in this implementation.
         self.fringe = [SearchNode(problem.start, [], [problem.start], 0, problem.getDistance(problem.start))]
@@ -419,10 +441,14 @@ class Greedy:
         '''
         self.statesExpanded += 1
 
+        self.visited.add(node.state)
+        
         ## dist is h(x) (the estimated distance to the goal state)
         for move,successor,cost,dist in self.problem.successors(node.state):
             ## Skip successors if they've already been seen on this path.
-            if successor in node.pathStatesSet:
+            if self.graphSearch and successor in self.visited:
+                continue
+            if not self.graphSearch and successor in node.pathStatesSet:
                 continue
                 
 
@@ -455,11 +481,13 @@ class AStar:
     AStar -- explores states based on their estimated distance to the
     goal state + the backwards distance (f(x) = g(x) + h(x))
     '''
-    def __init__(self, problem):
+    def __init__(self, problem, graphSearch=False):
         self.name = "AStar"
         self.problem = problem
         self.maxFringeSize = 0
         self.statesExpanded = 0
+        self.visited = set()
+        self.graphSearch = graphSearch
         ## Set the priority of the start state to h(x) -- we're calling it the
         ## "distance" to the goal in this implementation.
         self.fringe = [SearchNode(problem.start, [], [problem.start], 0, problem.getDistance(problem.start))]
@@ -494,13 +522,16 @@ class AStar:
             node (SearchNode): The node in the search tree to expand.
         '''
         self.statesExpanded += 1
+        self.visited.add(node.state)
+        
 
         ## dist is h(x) (the estimated distance to the goal state)
         for move,successor,cost,dist in self.problem.successors(node.state):
-            ## Skip successors if they've already been seen on this path.
-            if successor in node.pathStatesSet:
+            ## Skip successors already expanded globally (graph search).
+            if self.graphSearch and successor in self.visited:
                 continue
-                
+            if not self.graphSearch and successor in node.pathStatesSet:
+                continue
             heapq.heappush(self.fringe, SearchNode(
                 successor,
                 node.pathActions + [move],

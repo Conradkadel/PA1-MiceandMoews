@@ -322,7 +322,9 @@ def main():
             '           drawn to the screen; default is 60\n'+
             '   -marginSize=S -- S is the space between spots; default is 5\n'+
             '   -graphics=on|off -- if on (default), a window will appear showing\n'+
-            '             the progress of the search\n'
+            '             the progress of the search\n'+
+            '   -graph=on|off -- if on, graph search is used (visited states are\n'+
+            '             never re-expanded); if off (default), tree search is used\n'
             )
            
     ## Read in arguments.

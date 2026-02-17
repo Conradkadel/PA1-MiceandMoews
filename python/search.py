@@ -77,6 +77,9 @@ class BFS:
         self.visited = set()
         self.graphSearch = graphSearch
         self.fringe = [SearchNode(problem.start, [], [problem.start], 0)]
+        ## Mark start visited at enqueue time so it is never re-added to the fringe.
+        if graphSearch:
+            self.visited.add(problem.start)
 
     def nextState(self):
         '''
@@ -87,7 +90,7 @@ class BFS:
         '''
         ## Check if there are no more states to explore.
         if len(self.fringe) == 0:
-            return None 
+            return None
 
         ## Pick next state off the fringe, along with accounting information
         node = self.fringe.pop(0)
@@ -101,15 +104,14 @@ class BFS:
 
     def expandNode(self, node):
         '''
-        Adds each of the unexpanded successors of the given node's state to the 
+        Adds each of the unexpanded successors of the given node's state to the
         fringe.
 
         Parameters:
             node (SearchNode): The node in the search tree to expand.
         '''
         self.statesExpanded += 1
-        self.visited.add(node.state)
-        
+
         for move,successor,cost,dist in self.problem.successors(node.state):
             ## Skip successors if they've already been seen on this path.
             if self.graphSearch and successor in self.visited:
@@ -117,10 +119,15 @@ class BFS:
             if not self.graphSearch and successor in node.pathStatesSet:
                 continue
 
+            ## Mark visited when enqueuing so the same state is never added
+            ## to the fringe more than once (graph search only).
+            if self.graphSearch:
+                self.visited.add(successor)
+
             self.fringe.append(SearchNode(
                 successor,
                 node.pathActions + [move],
-                node.pathStates + [successor], 
+                node.pathStates + [successor],
                 node.pathCost + cost
             ))
 
@@ -152,6 +159,9 @@ class DFS:
         self.visited = set()
         self.graphSearch = graphSearch
         self.fringe = [SearchNode(problem.start, [], [problem.start], 0)]
+        ## Mark start visited at enqueue time so it is never re-pushed to the stack.
+        if graphSearch:
+            self.visited.add(problem.start)
 
     def nextState(self):
         '''
@@ -162,7 +172,7 @@ class DFS:
         '''
         ## Check if there are no more states to explore.
         if len(self.fringe) == 0:
-            return None 
+            return None
 
         ## Pick next state off the fringe, along with accounting information
         node = self.fringe.pop()
@@ -177,15 +187,14 @@ class DFS:
 
     def expandNode(self, node):
         '''
-        Adds each of the unexpanded successors of the given node's state to the 
+        Adds each of the unexpanded successors of the given node's state to the
         fringe.
 
         Parameters:
             node (SearchNode): The node in the search tree to expand.
         '''
         self.statesExpanded += 1
-        self.visited.add(node.state)
-        
+
         for move,successor,cost,dist in self.problem.successors(node.state):
             ## Skip successors if they've already been seen on this path.
             if self.graphSearch and successor in self.visited:
@@ -193,10 +202,15 @@ class DFS:
             if not self.graphSearch and successor in node.pathStatesSet:
                 continue
 
+            ## Mark visited when pushing so the same state is never added
+            ## to the stack more than once (graph search only).
+            if self.graphSearch:
+                self.visited.add(successor)
+
             self.fringe.append(SearchNode(
                 successor,
                 node.pathActions + [move],
-                node.pathStates + [successor], 
+                node.pathStates + [successor],
                 node.pathCost + cost
             ))
 
@@ -249,6 +263,7 @@ class IterativeDeepening:
             self.depth += 1
             self.depthReached = 0
             self.fringe = [SearchNode(self.problem.start, [], [self.problem.start], 0)]
+            self.visited = set()
             return self.nextState()
 
     def nextState(self):

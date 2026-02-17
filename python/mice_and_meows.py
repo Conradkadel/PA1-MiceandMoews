@@ -65,8 +65,8 @@ class MiceAndMeows(problem.Problem, ):
             'euclidean': self.euclideanDistance,
             'mice-remaining': self.miceRemainingDistance,
             'totalDistance' : self.heuristicTotalDistance,
-            'closestMice' : self.heuristicClosestMice,
-            'h2' : self.heuristicTwo
+            'closestMice' : self.heuristicClosestMice, # 1
+            'h2' : self.heuristicTwo # 2
         }
         if heuristic is None:
             self.heuristic = self.defaultHeuristic
@@ -242,7 +242,7 @@ class MiceAndMeows(problem.Problem, ):
         return(len(state.miceLocations) + ( abs(state.agentLocation[0] - closestM[0]) + abs(state.agentLocation[1] - closestM[1])))  
     
     ## This would work: Distance of all the mices together if there are mices, if not we caluclate the manhatten distance to the goal
-    ## Not optimal 
+    ## Optimal with A star .
     def heuristicTotalDistance(self,state):
         if len(state.miceLocations) == 0:
             return self.manhattanDistance(state)

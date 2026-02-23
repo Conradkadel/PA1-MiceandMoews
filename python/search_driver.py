@@ -1,8 +1,13 @@
 '''
 File:    search_driver.py
-Author:  Prof Feild
+Authors: Prof Feild (original), Conrad Kadel, Teo (modifications)
 Purpose: Implements the SearchDriver class that runs a search strategy on a
          given problem, optionally displaying the search graphically.
+
+Modifications:
+    - Added command-line argument support for micemeow problem
+    - Added -graph option for tree vs graph search
+    - Updated USAGE statement with micemeow problem description and heuristics
 '''
 
 from math import sqrt
@@ -297,11 +302,17 @@ def main():
 
     USAGE =('Usage: search_driver.py [arguments]\n\n'+
             'REQUIRED arguments:\n'+
-            '   -f=F -- F is the filename of the board to read in; settings:\n'+
+            '   -f=F -- F is the filename of the board to read in; format depends on problem:\n'+
             '           maze:\n'+
             '             s -- the agent\'s starting position\n'+
             '             e -- the exit from the maze (only one)\n'+
             '             w -- a wall (agent cannot enter)\n'+
+            '             [space] -- an open spot where the agent is allowed to enter\n'+
+            '           micemeow:\n'+
+            '             s -- the cat\'s starting position\n'+
+            '             e -- the exit (goal after catching all mice)\n'+
+            '             m -- a mouse (0 or more)\n'+
+            '             w -- water (cost: 6, vs normal cost: 1)\n'+
             '             [space] -- an open spot where the agent is allowed to enter\n'+
             '   -s=S -- S is the search strategy. Options:\n'+
             '            * bfs -- breadth first search\n'+
@@ -312,11 +323,17 @@ def main():
             '            * astar -- astar search\n'+
             '   -p=P -- P is the search problem; current options:\n'+
             '            * maze (find a path from entrance to exit)\n'+
+            '            * micemeow (cat catches all mice, then reaches exit)\n'+
             'OPTIONAL arguments:\n'+
             '   -h=H -- H is the heuristic. Possible values for H:\n'+
             '            for p=maze:\n'+
             '               * manhattan -- Manhattan distance to the exit\n'+
             '               * euclidean -- Euclidean distance to the exit\n'+
+            '            for p=micemeow:\n'+
+            '               * manhattan -- Manhattan distance to the exit\n'+
+            '               * euclidean -- Euclidean distance to the exit\n'+
+            '               * closestMice -- Distance to closest mouse + its distance to exit (admissible & consistent)\n'+
+            '               * h2 -- Number of mice remaining + distance to closest mouse (admissible)\n'+
             '   -fps=FPS -- FPS is the frames per second; default: 3\n'+
             '   -spotSize=S -- S is the width and height of the board spots\n'+
             '           drawn to the screen; default is 60\n'+

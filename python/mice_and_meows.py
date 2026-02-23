@@ -1,9 +1,13 @@
-# EXCLUDE FILE
 '''
 File:    mice_and_meows.py
-Author:  Prof Feild
-Purpose: Defines the Maze problem where an agent must navigate from a start
-         position to an exit position in a grid-based maze.
+Authors: Conrad Kadel, Teo
+Purpose: Defines the Of Mice and Meows problem where a cat agent must catch
+         all mice and navigate to the exit position in a grid-based board.
+
+Modifications:
+    - Implemented custom heuristics: closestMice, h2, totalDistance
+    - Added helper function getClosestMouse
+    - Added support for water tiles with different movement costs
 '''
 
 from math import sqrt
@@ -211,7 +215,15 @@ class MiceAndMeows(problem.Problem, ):
         return float(sqrt(pow(self.exit[0]-state.agentLocation[0], 2) + pow(self.exit[1]-state.agentLocation[1], 2)))
     
 
-    def getClosestMouse(self,state):
+    def getClosestMouse(self, state):
+        '''
+        Finds the closest mouse to the agent using Manhattan distance.
+
+        Parameters:
+            state (MiceAndMeowsState): The state to check.
+
+        Returns ((int, int)): The coordinates of the closest mouse, or None if no mice remain.
+        '''
         lowestDistance = float('inf')
         closestMouse = None
         for x,y in state.miceLocations:
@@ -222,34 +234,60 @@ class MiceAndMeows(problem.Problem, ):
         return closestMouse
     
 
-    ## THis one is optimal heuristic 
-    def heuristicClosestMice(self,state):
+    def heuristicClosestMice(self, state):
+        '''
+        Distance to nearest mouse plus distance from that mouse to exit.
+        Admissible and consistent - optimal for both tree and graph search.
+
+        Parameters:
+            state (MiceAndMeowsState): The state to check.
+
+        Returns (float): The estimated distance via the closest mouse to the exit.
+        '''
         if len(state.miceLocations) == 0:
             return self.manhattanDistance(state)
         lowestDistance = float('inf')
         closestMouse = self.getClosestMouse(state)
-        # h = distance to nearest mouse + Manhattan distance from that mouse to exit
-        # Still admissible: agent must visit at least the closest mouse, then reach the exit
         distToExit = abs(self.exit[0] - closestMouse[0]) + abs(self.exit[1] - closestMouse[1])
         return lowestDistance + distToExit
 
-    ##### second heuristic = Remaining number of mice + distance to closest mice
-    ## SEcond heuristic 
-    def heuristicTwo(self,state):
+    def heuristicTwo(self, state):
+        '''
+        Number of remaining mice plus distance to closest mouse.
+        Admissible but not necessarily consistent - optimal for tree search.
+
+        Parameters:
+            state (MiceAndMeowsState): The state to check.
+
+        Returns (float): The number of mice plus distance to the nearest mouse.
+        '''
         if len(state.miceLocations) == 0:
             return self.manhattanDistance(state)
         closestM = self.getClosestMouse(state)
-        return(len(state.miceLocations) + ( abs(state.agentLocation[0] - closestM[0]) + abs(state.agentLocation[1] - closestM[1])))  
+        return len(state.miceLocations) + (abs(state.agentLocation[0] - closestM[0]) + abs(state.agentLocation[1] - closestM[1]))  
     
-    ## This would work: Distance of all the mices together if there are mices, if not we caluclate the manhatten distance to the goal
-    ## Optimal with A star .
-    def heuristicTotalDistance(self,state):
+    def heuristicTotalDistance(self, state):
+        '''
+        Sum of distances between consecutive mice positions.
+
+        Parameters:
+            state (MiceAndMeowsState): The state to check.
+
+        Returns (float): Total distance between all mice, or Manhattan distance to exit if no mice.
+        '''
         if len(state.miceLocations) == 0:
             return self.manhattanDistance(state)
-        return(self.distanceBetweenMice(state))
-    
-    #
-    def distanceBetweenMice(self,state):
+        return self.distanceBetweenMice(state)
+
+    def distanceBetweenMice(self, state):
+        '''
+        Helper function to calculate total distance between consecutive mice.
+
+        Parameters:
+            state (MiceAndMeowsState): The state to check.
+
+        Returns (float): Sum of Manhattan distances between consecutive mice.
+        '''
         totalDistance = 0
         index = 0
         for x,y in state.miceLocations:

@@ -1,7 +1,11 @@
 '''
 File:    search.py
-Author:  Prof Feild
-Purpose: Implements various search strategies. 
+Authors: Prof Feild (original), Conrad Kadel, Teo (modifications)
+Purpose: Implements various search strategies including BFS, DFS, ID, UCS, Greedy, and A*.
+
+Modifications:
+    - Added graph search support to all search algorithms (BFS, DFS, ID, UCS, Greedy, A*)
+    - Added visited set tracking and graphSearch parameter to all search classes
 '''
 
 import heapq
